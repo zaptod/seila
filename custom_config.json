@@ -1,0 +1,153 @@
+{
+  "classes": {
+    "warrior": {
+      "max_health": 100,
+      "speed": 2.5,
+      "acceleration": 0.5,
+      "defense": 2,
+      "damage_multiplier": 1.0
+    },
+    "berserker": {
+      "max_health": 80,
+      "speed": 2.75,
+      "acceleration": 0.6,
+      "defense": 0,
+      "damage_multiplier": 1.2
+    },
+    "assassin": {
+      "max_health": 60,
+      "speed": 3.5,
+      "acceleration": 0.7,
+      "defense": 0,
+      "damage_multiplier": 1.1
+    },
+    "tank": {
+      "max_health": 150,
+      "speed": 1.5,
+      "acceleration": 0.2,
+      "defense": 5,
+      "damage_multiplier": 0.5000000000000001
+    },
+    "lancer": {
+      "max_health": 85,
+      "speed": 2.6,
+      "acceleration": 0.5,
+      "defense": 1,
+      "damage_multiplier": 1.0
+    },
+    "cleric": {
+      "max_health": 75,
+      "speed": 2.2,
+      "acceleration": 0.4,
+      "defense": 2,
+      "damage_multiplier": 0.6
+    },
+    "guardian": {
+      "max_health": 140,
+      "speed": 1.8,
+      "acceleration": 0.35,
+      "defense": 8,
+      "damage_multiplier": 0.7
+    },
+    "controller": {
+      "max_health": 90,
+      "speed": 2.3,
+      "acceleration": 0.45,
+      "defense": 3,
+      "damage_multiplier": 0.8
+    },
+    "ranger": {
+      "max_health": 65,
+      "speed": 3.0,
+      "acceleration": 0.6,
+      "defense": 0,
+      "damage_multiplier": 1.1
+    },
+    "enchanter": {
+      "max_health": 70,
+      "speed": 2.4,
+      "acceleration": 0.45,
+      "defense": 1,
+      "damage_multiplier": 0.7
+    },
+    "trapper": {
+      "max_health": 80,
+      "speed": 2.5,
+      "acceleration": 0.5,
+      "defense": 2,
+      "damage_multiplier": 0.9
+    }
+  },
+  "weapons": {
+    "sword": {
+      "base_damage": 19,
+      "range": 50,
+      "attack_cooldown": 0.8,
+      "knockback_force": 15,
+      "critical_chance": 0.1
+    },
+    "greatsword": {
+      "base_damage": 30,
+      "range": 70,
+      "attack_cooldown": 1.9500000000000004,
+      "knockback_force": 30,
+      "critical_chance": 0.15
+    },
+    "dagger": {
+      "base_damage": 14,
+      "range": 25,
+      "attack_cooldown": 0.35000000000000003,
+      "knockback_force": 4,
+      "critical_chance": 0.49999999999999994
+    },
+    "spear": {
+      "base_damage": 12,
+      "range": 80,
+      "attack_cooldown": 1.0,
+      "knockback_force": 50,
+      "critical_chance": 0.05
+    },
+    "staff": {
+      "base_damage": 5,
+      "range": 120,
+      "attack_cooldown": 0.6,
+      "knockback_force": 5,
+      "critical_chance": 0.2
+    },
+    "bow": {
+      "base_damage": 18,
+      "range": 200,
+      "attack_cooldown": 1.2,
+      "knockback_force": 8,
+      "critical_chance": 0.15
+    },
+    "warhammer": {
+      "base_damage": 25,
+      "range": 55,
+      "attack_cooldown": 1.5,
+      "knockback_force": 25,
+      "critical_chance": 0.1
+    },
+    "tome": {
+      "base_damage": 8,
+      "range": 100,
+      "attack_cooldown": 1.0,
+      "knockback_force": 3,
+      "critical_chance": 0.1
+    },
+    "shield_bash": {
+      "base_damage": 12,
+      "range": 35,
+      "attack_cooldown": 1.0,
+      "knockback_force": 20,
+      "critical_chance": 0.05
+    },
+    "trap_launcher": {
+      "base_damage": 10,
+      "range": 40,
+      "attack_cooldown": 0.8,
+      "knockback_force": 10,
+      "critical_chance": 0.1
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "agent_class": "tank",
+  "agent_weapon": "greatsword",
+  "opponent_class": "multi",
+  "opponent_weapon": "multi",
+  "multi_opponent": true,
+  "episode": 304,
+  "total_episodes": 10000,
+  "wins": 75,
+  "losses": 229,
+  "win_rate": 24.671052631578945,
+  "avg_reward": -2.0081916666666486,
+  "best_reward": 24.27300000000002,
+  "training_time": 4297.522061109543,
+  "has_neural_weights": true,
+  "weights_file": "model_tank_greatsword_vs_multi_ep304_20251203_170616.pth",
+  "policy_loss": -0.005537268301122822,
+  "value_loss": 0.2097589141339995,
+  "learning_updates": 265
+}
