@@ -177,14 +177,14 @@ class Sword(Weapon):
     
     def get_default_stats(self) -> WeaponStats:
         return WeaponStats(
-            base_damage=15,
-            attack_cooldown=0.8,
-            attack_duration=0.6,
+            base_damage=14,
+            attack_cooldown=0.75,
+            attack_duration=0.55,
             range=50,
             width=8,
-            knockback_force=15,
-            critical_chance=0.1,
-            critical_multiplier=2.0
+            knockback_force=14,
+            critical_chance=0.12,
+            critical_multiplier=1.8
         )
     
     def on_attack_start(self):
@@ -284,15 +284,15 @@ class Greatsword(Weapon):
     
     def get_default_stats(self) -> WeaponStats:
         return WeaponStats(
-            base_damage=30,
-            attack_cooldown=1.6,
-            attack_duration=1.0,
+            base_damage=28,
+            attack_cooldown=1.8,
+            attack_duration=1.1,
             range=70,
             width=12,
-            knockback_force=25,
-            critical_chance=0.15,
-            critical_multiplier=2.5,
-            armor_penetration=0.2
+            knockback_force=28,
+            critical_chance=0.12,
+            critical_multiplier=2.2,
+            armor_penetration=0.15
         )
     
     def on_attack_start(self):
@@ -392,15 +392,15 @@ class Dagger(Weapon):
     
     def get_default_stats(self) -> WeaponStats:
         return WeaponStats(
-            base_damage=8,
-            attack_cooldown=0.4,
-            attack_duration=0.3,
+            base_damage=7,
+            attack_cooldown=0.35,
+            attack_duration=0.25,
             range=30,
             width=4,
-            knockback_force=5,
-            critical_chance=0.3,
-            critical_multiplier=3.0,
-            lifesteal=0.1
+            knockback_force=4,
+            critical_chance=0.25,
+            critical_multiplier=2.5,
+            lifesteal=0.08
         )
     
     def on_attack_start(self):
@@ -507,13 +507,13 @@ class Spear(Weapon):
     
     def get_default_stats(self) -> WeaponStats:
         return WeaponStats(
-            base_damage=12,
-            attack_cooldown=1.0,
-            attack_duration=0.5,
+            base_damage=13,
+            attack_cooldown=0.9,
+            attack_duration=0.45,
             range=80,
             width=5,
-            knockback_force=20,
-            critical_chance=0.05,
+            knockback_force=18,
+            critical_chance=0.08,
             critical_multiplier=2.0
         )
     
@@ -616,15 +616,15 @@ class HealingStaff(Weapon):
     
     def get_default_stats(self) -> WeaponStats:
         return WeaponStats(
-            base_damage=5,  # Dano baixo quando ataca inimigos
-            attack_cooldown=0.6,
-            attack_duration=0.4,
-            range=120,  # Alcance de cura
+            base_damage=4,
+            attack_cooldown=0.5,
+            attack_duration=0.35,
+            range=130,
             width=15,
-            knockback_force=5,
-            critical_chance=0.2,  # Chance de cura crítica
-            critical_multiplier=1.5,
-            special_effects={'heal_amount': 15}  # Cura por ataque
+            knockback_force=3,
+            critical_chance=0.18,
+            critical_multiplier=1.4,
+            special_effects={'heal_amount': 18}
         )
     
     def on_attack_start(self):
@@ -726,15 +726,15 @@ class Bow(Weapon):
     
     def get_default_stats(self) -> WeaponStats:
         return WeaponStats(
-            base_damage=18,
-            attack_cooldown=1.2,
-            attack_duration=0.3,
-            range=200,  # Alcance longo
+            base_damage=15,
+            attack_cooldown=1.0,
+            attack_duration=0.25,
+            range=220,
             width=3,
-            knockback_force=8,
-            critical_chance=0.15,
-            critical_multiplier=2.5,
-            special_effects={'arrow_speed': 15}
+            knockback_force=6,
+            critical_chance=0.18,
+            critical_multiplier=2.2,
+            special_effects={'arrow_speed': 16}
         )
     
     def attack(self) -> bool:
@@ -858,15 +858,15 @@ class Warhammer(Weapon):
     
     def get_default_stats(self) -> WeaponStats:
         return WeaponStats(
-            base_damage=25,  # Dano alto
-            attack_cooldown=1.5,  # Muito lento
-            attack_duration=0.8,
+            base_damage=22,
+            attack_cooldown=1.7,
+            attack_duration=0.85,
             range=55,
-            width=25,  # Área grande
-            knockback_force=25,
-            critical_chance=0.1,
-            critical_multiplier=2.0,
-            special_effects={'stun_duration': 0.8}  # Stun de 0.8s
+            width=25,
+            knockback_force=30,
+            critical_chance=0.08,
+            critical_multiplier=1.8,
+            special_effects={'stun_duration': 1.0}
         )
     
     def on_attack_start(self):
@@ -990,17 +990,17 @@ class MagicTome(Weapon):
     
     def get_default_stats(self) -> WeaponStats:
         return WeaponStats(
-            base_damage=8,
-            attack_cooldown=1.0,
-            attack_duration=0.5,
-            range=100,  # Alcance de buff
+            base_damage=6,
+            attack_cooldown=0.9,
+            attack_duration=0.45,
+            range=110,
             width=10,
-            knockback_force=3,
+            knockback_force=2,
             critical_chance=0.1,
-            critical_multiplier=1.5,
+            critical_multiplier=1.4,
             special_effects={
-                'buff_damage': 0.15,  # +15% dano
-                'buff_duration': 4.0
+                'buff_damage': 0.20,
+                'buff_duration': 5.0
             }
         )
     
@@ -1106,15 +1106,15 @@ class ShieldBash(Weapon):
     
     def get_default_stats(self) -> WeaponStats:
         return WeaponStats(
-            base_damage=12,
-            attack_cooldown=1.0,
-            attack_duration=0.4,
+            base_damage=10,
+            attack_cooldown=0.9,
+            attack_duration=0.35,
             range=35,
-            width=30,
-            knockback_force=20,  # Alto knockback
+            width=32,
+            knockback_force=25,
             critical_chance=0.05,
-            critical_multiplier=1.5,
-            special_effects={'slow_duration': 1.0, 'slow_power': 0.3}
+            critical_multiplier=1.3,
+            special_effects={'slow_duration': 1.2, 'slow_power': 0.35}
         )
     
     def on_attack_start(self):
@@ -1222,18 +1222,18 @@ class TrapLauncher(Weapon):
     
     def get_default_stats(self) -> WeaponStats:
         return WeaponStats(
-            base_damage=20,  # Dano da armadilha
-            attack_cooldown=1.2,
-            attack_duration=0.4,
-            range=180,  # Alcance do lançamento
-            width=25,   # Raio da armadilha
-            knockback_force=5,
-            critical_chance=0.1,
-            critical_multiplier=1.5,
+            base_damage=15,
+            attack_cooldown=1.0,
+            attack_duration=0.35,
+            range=180,
+            width=28,
+            knockback_force=4,
+            critical_chance=0.08,
+            critical_multiplier=1.4,
             special_effects={
-                'trap_damage': 30,
-                'root_duration': 1.8,
-                'projectile_speed': 350
+                'trap_damage': 25,
+                'root_duration': 2.0,
+                'projectile_speed': 380
             }
         )
     

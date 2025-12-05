@@ -275,3 +275,60 @@ class Physics:
         elif entity.y > max_y:
             entity.y = max_y
             entity.vy = -abs(entity.vy) * self.restitution
+    
+    def constrain_projectile_to_arena(self, projectile: dict, arena_rect: pygame.Rect, 
+                                       radius: float = 5) -> bool:
+        """
+        Verifica e trata colisão de projétil com bordas da arena.
+        Retorna True se o projétil deve ser desativado.
+        """
+        x = projectile.get('x', 0)
+        y = projectile.get('y', 0)
+        
+        # Verificar se está fora da arena
+        if (x - radius < arena_rect.left or 
+            x + radius > arena_rect.right or
+            y - radius < arena_rect.top or 
+            y + radius > arena_rect.bottom):
+            return True  # Desativar projétil
+        
+        return False
+    
+    def check_projectiles_arena_collision(self, entities: List['Entity'], arena_rect: pygame.Rect):
+        """Verifica colisão de todos os projéteis com as bordas da arena"""
+        for entity in entities:
+            if not entity.is_alive() or not hasattr(entity, 'weapon') or not entity.weapon:
+                continue
+            
+            weapon = entity.weapon
+            
+            # Arco - flechas
+            if hasattr(weapon, 'arrows'):
+                for arrow in weapon.arrows[:]:
+                    if arrow.get('active', False):
+                        if self.constrain_projectile_to_arena(arrow, arena_rect, radius=3):
+                            arrow['active'] = False
+            
+            # Trap Launcher - armadilhas em voo
+            if hasattr(weapon, 'launched_traps'):
+                for trap in weapon.launched_traps[:]:
+                    if trap.get('in_flight', False):
+                        if self.constrain_projectile_to_arena(trap, arena_rect, radius=8):
+                            # Armadilha colide com borda e cai ali
+                            trap['in_flight'] = False
+                            # Converter para armadilha no chão na posição atual
+                            if hasattr(weapon, 'ground_traps') and len(weapon.ground_traps) < weapon.max_ground_traps:
+                                # Clamp position to arena
+                                trap_x = max(arena_rect.left + 20, min(trap['x'], arena_rect.right - 20))
+                                trap_y = max(arena_rect.top + 20, min(trap['y'], arena_rect.bottom - 20))
+                                weapon.ground_traps.append({
+                                    'x': trap_x,
+                                    'y': trap_y,
+                                    'radius': weapon.stats.width,
+                                    'duration': weapon.trap_duration,
+                                    'damage': weapon.stats.special_effects['trap_damage'],
+                                    'root_duration': weapon.stats.special_effects['root_duration'],
+                                    'active': True,
+                                    'armed_time': 0.3
+                                })
+                            weapon.launched_traps.remove(trap)

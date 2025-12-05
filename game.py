@@ -1026,6 +1026,9 @@ class Game:
             for entity in self.entities:
                 self.physics.constrain_to_arena(entity, arena_rect)
             
+            # Colisão de projéteis com bordas da arena
+            self.physics.check_projectiles_arena_collision(self.entities, arena_rect)
+            
             # Verificar fim da batalha
             blue_alive = sum(1 for e in self.blue_team if e.is_alive())
             red_alive = sum(1 for e in self.red_team if e.is_alive())
@@ -1739,6 +1742,9 @@ class Game:
             for entity in self.entities:
                 self.physics.constrain_to_arena(entity, arena_rect)
             
+            # Colisão de projéteis com bordas da arena
+            self.physics.check_projectiles_arena_collision(self.entities, arena_rect)
+            
             # Detectar dano para ativar slow motion
             agent_took_damage = self.training_entity and self.training_entity.health < agent_health_before
             opponent_took_damage = self.training_opponent and self.training_opponent.health < opponent_health_before
@@ -2396,6 +2402,9 @@ class Game:
         arena_rect = pygame.Rect(*self.arena_config.playable_rect)
         for entity in self.entities:
             self.physics.constrain_to_arena(entity, arena_rect)
+        
+        # Colisão de projéteis com bordas da arena
+        self.physics.check_projectiles_arena_collision(self.entities, arena_rect)
         
         # Detectar se alguém tomou dano para ativar slow motion
         for entity in self.entities:

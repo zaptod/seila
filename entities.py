@@ -305,6 +305,9 @@ class Entity(ABC):
     
     def draw(self, screen: pygame.Surface):
         """Desenha a entidade"""
+        # Preview de área de habilidade (desenhar primeiro, atrás de tudo)
+        self._draw_ability_preview(screen)
+        
         # Piscar se invulnerável
         if self.invulnerable_time > 0 and int(self.invulnerable_time * 10) % 2 == 0:
             color = tuple(min(255, c + 100) for c in self.color)
@@ -402,6 +405,77 @@ class Entity(ABC):
                 (int(self.x + 5), int(self.y - self.radius - 15))
             ])
     
+    def _draw_ability_preview(self, screen: pygame.Surface):
+        """Desenha preview da área de efeito da habilidade quando pronta"""
+        if self.ability_cooldown > 0:
+            return  # Habilidade não está pronta
+        
+        # Obter info da habilidade para determinar o tipo de preview
+        ability_info = self.get_ability_info()
+        ability_name = ability_info.get('name', '')
+        
+        # Determinar raio/área baseado na classe
+        preview_color = (255, 255, 100, 40)  # Amarelo transparente padrão
+        
+        # Classes de cura/suporte - verde
+        if self.role == 'support':
+            preview_color = (100, 255, 150, 30)
+            radius = 150  # Raio de cura típico
+        # Classes tank/defesa - azul
+        elif self.role == 'tank':
+            preview_color = (100, 150, 255, 30)
+            radius = 120
+        # Classes controle - laranja
+        elif self.role == 'control':
+            preview_color = (255, 200, 100, 30)
+            radius = 100
+        # Classes ranged - vermelho
+        elif self.role == 'ranged':
+            preview_color = (255, 100, 100, 30)
+            radius = 80
+            # Preview em cone para ranger
+            self._draw_cone_preview(screen, radius * 2, math.pi / 3)
+            return
+        else:
+            # Classes melee - amarelo
+            preview_color = (255, 255, 100, 30)
+            radius = 80
+        
+        # Desenhar círculo de preview
+        s = pygame.Surface((int(radius * 2), int(radius * 2)), pygame.SRCALPHA)
+        pygame.draw.circle(s, preview_color, (int(radius), int(radius)), int(radius))
+        pygame.draw.circle(s, (preview_color[0], preview_color[1], preview_color[2], 80), 
+                          (int(radius), int(radius)), int(radius), 2)
+        screen.blit(s, (int(self.x - radius), int(self.y - radius)))
+    
+    def _draw_cone_preview(self, screen: pygame.Surface, distance: float, angle: float):
+        """Desenha preview de habilidade em cone (para ranger, etc)"""
+        # Centro do cone é à frente do personagem
+        cone_color = (255, 100, 100, 30)
+        
+        # Calcular pontos do cone
+        half_angle = angle / 2
+        left_angle = self.facing_angle - half_angle
+        right_angle = self.facing_angle + half_angle
+        
+        points = [(int(self.x), int(self.y))]
+        
+        # Adicionar pontos ao longo do arco
+        num_segments = 12
+        for i in range(num_segments + 1):
+            segment_angle = left_angle + (right_angle - left_angle) * i / num_segments
+            px = self.x + math.cos(segment_angle) * distance
+            py = self.y + math.sin(segment_angle) * distance
+            points.append((int(px), int(py)))
+        
+        # Desenhar cone
+        if len(points) >= 3:
+            s = pygame.Surface((int(distance * 2.5), int(distance * 2.5)), pygame.SRCALPHA)
+            offset_points = [(int(p[0] - self.x + distance * 1.25), int(p[1] - self.y + distance * 1.25)) for p in points]
+            pygame.draw.polygon(s, cone_color, offset_points)
+            pygame.draw.polygon(s, (cone_color[0], cone_color[1], cone_color[2], 80), offset_points, 2)
+            screen.blit(s, (int(self.x - distance * 1.25), int(self.y - distance * 1.25)))
+    
     def _draw_shield_bar(self, screen: pygame.Surface):
         """Desenha a barra de escudo"""
         bar_width = 50
@@ -419,31 +493,137 @@ class Entity(ABC):
                         (bar_x, bar_y, bar_width, bar_height), 1)
     
     def _draw_health_bar(self, screen: pygame.Surface):
-        """Desenha a barra de vida"""
+        """Desenha a barra de vida melhorada com escudo, cooldown e efeitos"""
         stats = self.stats_manager.get_stats()
-        bar_width = 50
-        bar_height = 6
+        bar_width = 55
+        bar_height = 7
         bar_x = self.x - bar_width // 2
-        bar_y = self.y - self.radius - 15
+        bar_y = self.y - self.radius - 18
         
         health_ratio = self.health / stats.max_health
         
-        # Fundo
-        pygame.draw.rect(screen, (60, 60, 60), 
+        # Calcular escudo total ativo
+        shield_amount = 0
+        for effect in self.status_effects.effects.values():
+            if effect.effect_type == StatusEffectType.SHIELD:
+                shield_amount += effect.remaining_shield if hasattr(effect, 'remaining_shield') else effect.power
+        
+        # Fundo da barra (mais escuro)
+        pygame.draw.rect(screen, (30, 30, 30), 
+                        (bar_x - 1, bar_y - 1, bar_width + 2, bar_height + 2))
+        pygame.draw.rect(screen, (50, 50, 50), 
                         (bar_x, bar_y, bar_width, bar_height))
         
-        # Cor baseada na vida
-        if health_ratio > 0.5:
-            health_color = (100, 255, 100)
-        elif health_ratio > 0.25:
-            health_color = (255, 255, 100)
+        # Cor baseada na vida (gradiente mais suave)
+        if health_ratio > 0.6:
+            health_color = (80, 220, 80)
+        elif health_ratio > 0.35:
+            health_color = (220, 200, 60)
+        elif health_ratio > 0.15:
+            health_color = (220, 130, 50)
         else:
-            health_color = (255, 100, 100)
+            health_color = (220, 60, 60)
         
-        pygame.draw.rect(screen, health_color, 
-                        (bar_x, bar_y, bar_width * health_ratio, bar_height))
-        pygame.draw.rect(screen, (255, 255, 255), 
+        # Barra de vida
+        if health_ratio > 0:
+            pygame.draw.rect(screen, health_color, 
+                            (bar_x, bar_y, int(bar_width * health_ratio), bar_height))
+        
+        # Barra de escudo (por cima da vida, azul claro)
+        if shield_amount > 0:
+            shield_ratio = min(shield_amount / stats.max_health, 1.0)
+            shield_color = (100, 180, 255, 180)
+            shield_rect_width = int(bar_width * shield_ratio)
+            # Desenhar escudo na frente
+            shield_start = bar_x + int(bar_width * health_ratio)
+            if shield_start + shield_rect_width > bar_x + bar_width:
+                shield_rect_width = bar_x + bar_width - shield_start
+            if shield_rect_width > 0:
+                s = pygame.Surface((shield_rect_width, bar_height), pygame.SRCALPHA)
+                s.fill(shield_color)
+                screen.blit(s, (shield_start, bar_y))
+        
+        # Borda da barra
+        pygame.draw.rect(screen, (200, 200, 200), 
                         (bar_x, bar_y, bar_width, bar_height), 1)
+        
+        # Texto de HP (pequeno)
+        font = pygame.font.Font(None, 16)
+        hp_text = f"{int(self.health)}"
+        text_surface = font.render(hp_text, True, (255, 255, 255))
+        text_rect = text_surface.get_rect(center=(self.x, bar_y + bar_height // 2))
+        screen.blit(text_surface, text_rect)
+        
+        # Barra de cooldown de habilidade (menor, abaixo da vida)
+        if hasattr(self, 'ability_cooldown'):
+            cd_bar_width = 40
+            cd_bar_height = 3
+            cd_bar_x = self.x - cd_bar_width // 2
+            cd_bar_y = bar_y + bar_height + 2
+            
+            ability_info = self.get_ability_info()
+            max_cooldown = ability_info.get('cooldown', 10)
+            
+            if self.ability_cooldown > 0:
+                cd_ratio = 1 - (self.ability_cooldown / max_cooldown)
+                # Fundo
+                pygame.draw.rect(screen, (30, 30, 50), 
+                                (cd_bar_x, cd_bar_y, cd_bar_width, cd_bar_height))
+                # Progresso
+                pygame.draw.rect(screen, (80, 120, 220), 
+                                (cd_bar_x, cd_bar_y, int(cd_bar_width * cd_ratio), cd_bar_height))
+            else:
+                # Habilidade pronta - brilha
+                pygame.draw.rect(screen, (100, 200, 255), 
+                                (cd_bar_x, cd_bar_y, cd_bar_width, cd_bar_height))
+        
+        # Indicadores de efeitos de status (ícones pequenos)
+        self._draw_status_icons(screen, bar_x, bar_y - 10)
+    
+    def _draw_status_icons(self, screen: pygame.Surface, x: float, y: float):
+        """Desenha ícones de efeitos de status ativos"""
+        icon_size = 8
+        icon_spacing = 10
+        current_x = x
+        
+        # Agrupar efeitos por tipo
+        effect_types = {}
+        for effect in self.status_effects.effects.values():
+            etype = effect.effect_type
+            if etype not in effect_types:
+                effect_types[etype] = []
+            effect_types[etype].append(effect)
+        
+        # Desenhar ícone para cada tipo de efeito
+        for etype, effects in effect_types.items():
+            color = (128, 128, 128)  # Cinza padrão
+            
+            if etype == StatusEffectType.POISON:
+                color = (100, 200, 50)  # Verde
+            elif etype == StatusEffectType.BLEED:
+                color = (200, 50, 50)  # Vermelho
+            elif etype == StatusEffectType.BURN:
+                color = (255, 150, 50)  # Laranja
+            elif etype == StatusEffectType.STUN:
+                color = (255, 255, 100)  # Amarelo
+            elif etype == StatusEffectType.ROOT:
+                color = (139, 90, 43)  # Marrom
+            elif etype == StatusEffectType.SLOW:
+                color = (100, 150, 255)  # Azul claro
+            elif etype == StatusEffectType.BUFF_DAMAGE:
+                color = (255, 100, 100)  # Vermelho claro
+            elif etype == StatusEffectType.BUFF_SPEED:
+                color = (100, 255, 100)  # Verde claro
+            elif etype == StatusEffectType.SHIELD:
+                color = (100, 200, 255)  # Azul ciano
+            elif etype == StatusEffectType.HEAL_OVER_TIME:
+                color = (150, 255, 150)  # Verde suave
+            
+            # Desenhar ícone (círculo pequeno)
+            pygame.draw.circle(screen, color, (int(current_x + icon_size // 2), int(y)), icon_size // 2)
+            pygame.draw.circle(screen, (255, 255, 255), (int(current_x + icon_size // 2), int(y)), icon_size // 2, 1)
+            
+            current_x += icon_spacing
     
     def get_state(self) -> Dict:
         """
@@ -502,18 +682,19 @@ class Warrior(Entity):
         self.ability_timer = 0
     
     def get_default_stats(self) -> BaseStats:
+        # Warrior - classe equilibrada
         return BaseStats(
             max_health=100,
-            health_regen=1,
+            health_regen=1.5,
             speed=2.5,
             acceleration=0.5,
             friction=0.95,
             radius=30,
             mass=3.0,
-            knockback_resistance=0.1,
+            knockback_resistance=0.15,
             damage_multiplier=1.0,
-            defense=2,
-            armor=0.1,
+            defense=3,
+            armor=0.12,
             attack_speed=1.0,
             attack_range=1.0
         )
@@ -561,19 +742,20 @@ class Berserker(Entity):
     default_weapon = "greatsword"
     
     def get_default_stats(self) -> BaseStats:
+        # Berserker - high risk high reward
         return BaseStats(
-            max_health=80,
-            health_regen=0,
-            speed=2.75,
+            max_health=90,
+            health_regen=0.5,
+            speed=2.8,
             acceleration=0.6,
             friction=0.93,
             radius=32,
             mass=3.5,
             knockback_resistance=0.2,
-            damage_multiplier=1.2,
-            defense=0,
-            armor=0,
-            attack_speed=0.9,
+            damage_multiplier=1.15,
+            defense=1,
+            armor=0.05,
+            attack_speed=0.95,
             attack_range=1.1
         )
     
@@ -639,20 +821,21 @@ class Assassin(Entity):
         self.invisible_timer = 0
     
     def get_default_stats(self) -> BaseStats:
+        # Assassin - glass cannon
         return BaseStats(
-            max_health=60,
-            health_regen=2,
-            speed=3.5,
+            max_health=70,
+            health_regen=2.0,
+            speed=3.3,
             acceleration=0.7,
             friction=0.92,
             radius=25,
             mass=2.0,
-            knockback_resistance=0,
-            damage_multiplier=1.1,
+            knockback_resistance=0.0,
+            damage_multiplier=1.05,
             defense=0,
-            armor=0,
-            attack_speed=1.5,
-            attack_range=0.9
+            armor=0.0,
+            attack_speed=1.4,
+            attack_range=0.85
         )
     
     def get_ability_info(self) -> Dict:
@@ -728,18 +911,19 @@ class Tank(Entity):
         self.shield_timer = 0
     
     def get_default_stats(self) -> BaseStats:
+        # Tank - very tanky, low damage
         return BaseStats(
-            max_health=150,
-            health_regen=3,
-            speed=1.75,
-            acceleration=0.3,
+            max_health=160,
+            health_regen=2.5,
+            speed=1.8,
+            acceleration=0.35,
             friction=0.97,
             radius=38,
-            mass=5.0,
+            mass=5.5,
             knockback_resistance=0.5,
-            damage_multiplier=0.8,
-            defense=5,
-            armor=0.25,
+            damage_multiplier=0.75,
+            defense=6,
+            armor=0.28,
             attack_speed=0.7,
             attack_range=1.0
         )
@@ -796,8 +980,9 @@ class Lancer(Entity):
     default_weapon = "spear"
     
     def get_default_stats(self) -> BaseStats:
+        # Lancer - range focused
         return BaseStats(
-            max_health=85,
+            max_health=90,
             health_regen=1.5,
             speed=2.6,
             acceleration=0.5,
@@ -805,11 +990,11 @@ class Lancer(Entity):
             radius=28,
             mass=2.8,
             knockback_resistance=0.15,
-            damage_multiplier=1.0,
-            defense=1,
-            armor=0.05,
+            damage_multiplier=0.95,
+            defense=2,
+            armor=0.08,
             attack_speed=1.1,
-            attack_range=1.3  # 30% mais alcance
+            attack_range=1.35  # 35% mais alcance
         )
     
     def get_ability_info(self) -> Dict:
@@ -855,21 +1040,22 @@ class Cleric(Entity):
         self.passive_heal_interval = 2.0  # Cura passiva a cada 2 segundos
     
     def get_default_stats(self) -> BaseStats:
+        # Cleric - healer, low damage
         return BaseStats(
-            max_health=75,
-            health_regen=3,
+            max_health=85,
+            health_regen=3.0,
             speed=2.2,
             acceleration=0.4,
             friction=0.95,
             radius=26,
             mass=2.5,
             knockback_resistance=0.1,
-            damage_multiplier=0.6,  # Dano baixo
+            damage_multiplier=0.55,
             defense=2,
             armor=0.1,
-            attack_speed=0.8,
+            attack_speed=0.85,
             attack_range=1.0,
-            ability_power=1.5  # Cura 50% mais forte
+            ability_power=1.4  # Cura 40% mais forte
         )
     
     def get_ability_info(self) -> Dict:
@@ -949,19 +1135,20 @@ class Guardian(Entity):
         self.protected_allies: List[Entity] = []
     
     def get_default_stats(self) -> BaseStats:
+        # Guardian - shield tank
         return BaseStats(
-            max_health=140,
-            health_regen=2,
-            speed=1.8,
+            max_health=150,
+            health_regen=2.0,
+            speed=1.85,
             acceleration=0.35,
             friction=0.96,
             radius=36,
             mass=5.5,
-            knockback_resistance=0.6,
-            damage_multiplier=0.7,
-            defense=8,
-            armor=0.35,
-            attack_speed=0.6,
+            knockback_resistance=0.55,
+            damage_multiplier=0.65,
+            defense=7,
+            armor=0.32,
+            attack_speed=0.65,
             attack_range=0.9
         )
     
@@ -1032,20 +1219,22 @@ class Controller(Entity):
         self.cc_amplifier = 1.0  # Amplificador de duração de CC
     
     def get_default_stats(self) -> BaseStats:
+        # Controller - CC specialist (more HP, less damage)
         return BaseStats(
-            max_health=90,
-            health_regen=1.5,
+            max_health=85,
+            health_regen=1.3,
             speed=2.3,
             acceleration=0.45,
             friction=0.94,
             radius=30,
             mass=3.5,
-            knockback_resistance=0.25,
-            damage_multiplier=0.8,
+            knockback_resistance=0.20,
+            damage_multiplier=0.70,
             defense=3,
-            armor=0.15,
-            attack_speed=0.75,
-            attack_range=1.1
+            armor=0.12,
+            attack_speed=0.80,
+            attack_range=1.1,
+            ability_power=1.35  # CC mais efetivo
         )
     
     def get_ability_info(self) -> Dict:
@@ -1118,20 +1307,21 @@ class Ranger(Entity):
         self.arrow_recharge_time = 2.0
     
     def get_default_stats(self) -> BaseStats:
+        # Ranger - mobile ranged DPS
         return BaseStats(
-            max_health=65,
-            health_regen=1,
+            max_health=78,
+            health_regen=1.0,
             speed=3.0,
             acceleration=0.6,
             friction=0.92,
             radius=24,
             mass=2.2,
             knockback_resistance=0.05,
-            damage_multiplier=1.1,
-            defense=0,
-            armor=0,
-            attack_speed=1.3,
-            attack_range=2.0  # Dobro de alcance
+            damage_multiplier=1.0,
+            defense=1,
+            armor=0.05,
+            attack_speed=1.15,
+            attack_range=1.8
         )
     
     def get_ability_info(self) -> Dict:
@@ -1205,21 +1395,22 @@ class Enchanter(Entity):
         self.buff_timer = 0
     
     def get_default_stats(self) -> BaseStats:
+        # Enchanter - buffer support
         return BaseStats(
-            max_health=70,
-            health_regen=2,
-            speed=2.4,
+            max_health=72,
+            health_regen=1.8,
+            speed=2.35,
             acceleration=0.45,
             friction=0.94,
             radius=25,
             mass=2.3,
-            knockback_resistance=0.1,
-            damage_multiplier=0.7,
-            defense=1,
-            armor=0.05,
-            attack_speed=0.9,
+            knockback_resistance=0.08,
+            damage_multiplier=0.55,
+            defense=2,
+            armor=0.08,
+            attack_speed=0.80,
             attack_range=1.2,
-            ability_power=1.3
+            ability_power=1.4  # Buffs fortes
         )
     
     def get_ability_info(self) -> Dict:
@@ -1313,20 +1504,22 @@ class Trapper(Entity):
         self.trap_duration = 15.0
     
     def get_default_stats(self) -> BaseStats:
+        # Trapper - trap specialist
         return BaseStats(
-            max_health=80,
-            health_regen=1.5,
-            speed=2.5,
+            max_health=82,
+            health_regen=1.2,
+            speed=2.6,
             acceleration=0.5,
             friction=0.94,
             radius=27,
             mass=2.8,
-            knockback_resistance=0.15,
-            damage_multiplier=0.9,
+            knockback_resistance=0.12,
+            damage_multiplier=0.80,
             defense=2,
-            armor=0.1,
-            attack_speed=0.85,
-            attack_range=1.0
+            armor=0.10,
+            attack_speed=0.90,
+            attack_range=1.1,
+            ability_power=1.2  # Armadilhas eficazes
         )
     
     def get_ability_info(self) -> Dict:

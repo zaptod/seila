@@ -224,29 +224,24 @@ Treine uma IA usando PPO (Proximal Policy Optimization):
 
 ## 🐛 Bugs Conhecidos
 
-### Prioridade Alta
-1. **Balanceamento de dano** - Algumas combinações classe+arma podem estar desbalanceadas
-2. **Projeteis atravessam paredes** - Flechas e armadilhas não colidem com bordas da arena
-
 ### Prioridade Média
-3. **Slow motion no treinamento** - Às vezes trava em slow motion
-4. **Cooldown visual** - Barra de cooldown pode não sincronizar perfeitamente
-5. **Múltiplos status do mesmo tipo** - Podem se sobrepor de forma inconsistente
+1. **Slow motion no treinamento** - Às vezes trava em slow motion
+2. **Múltiplos status do mesmo tipo** - Podem se sobrepor de forma inconsistente
 
 ### Prioridade Baixa
-6. **Renderização de armadilhas** - Armadilhas do Trapper e TrapLauncher podem sobrepor
-7. **Som** - Não há efeitos sonoros implementados
-8. **Animações** - Animações são simples, poderiam ser melhoradas
+3. **Renderização de armadilhas** - Armadilhas do Trapper e TrapLauncher podem sobrepor
+4. **Som** - Não há efeitos sonoros implementados
+5. **Animações** - Animações são simples, poderiam ser melhoradas
 
 ---
 
 ## 🚀 Planos Futuros
 
-### Curto Prazo (v2.1)
-- [ ] **Balanceamento** - Ajustar dano, vida e cooldowns de todas as classes
-- [ ] **Colisão de projéteis** - Flechas e armadilhas colidem com bordas
-- [ ] **UI melhorada** - Barras de status mais claras
-- [ ] **Indicadores visuais** - Mostrar área de habilidades antes de usar
+### Curto Prazo (v2.1) ✅ CONCLUÍDO
+- [x] **Balanceamento** - Stats ajustados para todas as 11 classes e 10 armas
+- [x] **Colisão de projéteis** - Flechas e armadilhas colidem com bordas da arena
+- [x] **UI melhorada** - Barras de vida com HP, escudo, cooldown e ícones de status
+- [x] **Indicadores visuais** - Preview de área de habilidades quando prontas
 
 ### Médio Prazo (v2.5)
 - [ ] **Mais mapas** - Arenas com obstáculos e layouts diferentes
@@ -283,6 +278,7 @@ seila/
 ├── stats.py             # Status effects e gerenciamento de stats
 ├── game_state.py        # Estado do jogo
 ├── maps.py              # Configuração de arenas
+├── balance_config.py    # Configurações centralizadas de balanceamento
 ├── config_db.py         # Configurações do banco de dados
 ├── train.py             # Treinamento de IA
 ├── team_train.py        # Treinamento de times
