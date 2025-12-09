@@ -303,8 +303,11 @@ class Entity(ABC):
             return self.weapon.attack()
         return False
     
-    def draw(self, screen: pygame.Surface):
+    def draw(self, screen: pygame.Surface, offset: Tuple[float, float] = (0, 0)):
         """Desenha a entidade"""
+        # Nota: As coordenadas self.x, self.y já estão ajustadas para a câmera
+        # no game.py, então desenhamos diretamente sem usar offset aqui.
+        
         # Preview de área de habilidade (desenhar primeiro, atrás de tudo)
         self._draw_ability_preview(screen)
         
@@ -369,9 +372,9 @@ class Entity(ABC):
         # Burn - partículas de fogo
         if self.status_effects.has_effect(StatusEffectType.BURN):
             for i in range(3):
-                offset = math.sin(pygame.time.get_ticks() * 0.01 + i) * 5
+                burn_offset = math.sin(pygame.time.get_ticks() * 0.01 + i) * 5
                 pygame.draw.circle(screen, (255, 150, 50), 
-                                  (int(self.x + offset), int(self.y - self.radius - 5 - i * 5)), 3)
+                                  (int(self.x + burn_offset), int(self.y - self.radius - 5 - i * 5)), 3)
         
         # Poison - aura verde
         if self.status_effects.has_effect(StatusEffectType.POISON):
@@ -1582,19 +1585,20 @@ class Trapper(Entity):
                 if trap in self.traps:
                     self.traps.remove(trap)
     
-    def draw(self, screen: pygame.Surface):
+    def draw(self, screen: pygame.Surface, cam_offset: Tuple[float, float] = (0, 0)):
         super().draw(screen)
+        ox, oy = cam_offset
         
-        # Desenhar armadilhas
+        # Desenhar armadilhas (estas usam coordenadas absolutas, então precisamos do offset)
         for trap in self.traps:
             if trap['active']:
                 # Armadilha ativa - cor marrom/amarela
                 pygame.draw.circle(screen, (180, 140, 60), 
-                                 (int(trap['x']), int(trap['y'])), int(trap['radius']), 2)
+                                 (int(trap['x'] - ox), int(trap['y'] - oy)), int(trap['radius']), 2)
                 # Centro da armadilha
                 pygame.draw.circle(screen, (220, 180, 80), 
-                                 (int(trap['x']), int(trap['y'])), 5)
+                                 (int(trap['x'] - ox), int(trap['y'] - oy)), 5)
             else:
                 # Armadilha desativada - cinza
                 pygame.draw.circle(screen, (100, 100, 100), 
-                                 (int(trap['x']), int(trap['y'])), int(trap['radius']), 1)
+                                 (int(trap['x'] - ox), int(trap['y'] - oy)), int(trap['radius']), 1)

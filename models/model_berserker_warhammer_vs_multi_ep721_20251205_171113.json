@@ -1,0 +1,15 @@
+{
+  "agent_class": "berserker",
+  "agent_weapon": "warhammer",
+  "multi_opponent": true,
+  "episode": 721,
+  "total_episodes": 8000,
+  "wins": 351,
+  "losses": 370,
+  "win_rate": 48.68238557558946,
+  "avg_reward": -6.072608517626324,
+  "best_reward": 29.159549397949988,
+  "training_time": 3996.6137986183167,
+  "has_neural_weights": true,
+  "weights_file": "model_berserker_warhammer_vs_multi_ep721_20251205_171113.pth"
+}
